@@ -47,6 +47,7 @@ auth2.update_rating()
 
 #Лучший автор - получим Query Set
 Author.objects.all().order_by('-rating').values('user__username','rating')[0]
+
 #Лучшая публикация - а тут разобьём на отдельные этапы, чтоб получать сразу значения, ну и для удобства
 best_post = Post.objects.all().order_by('-rating')[0]
 best_post.public_date.strftime('%d.%m.%Y')
@@ -55,6 +56,11 @@ best_post.rating
 best_post.header
 best_post.preview()
 
+#Все комментарии к этой статье
+Comment.objects.filter(post=best_post).values('user__username','content')
+
+
+
 #После создания объектов в БД применять следующие команды
 
 from django.contrib.auth.models import User
@@ -62,6 +68,7 @@ from news.models import *
 
 user1 = User.objects.get(id=1)
 user2 = User.objects.get(id=2)
+user3 = User.objects.get(id=3)
 auth1 = Author.objects.get(id=1)
 auth2 = Author.objects.get(id=2)
 cat1 = Category.objects.get(id=1)
@@ -77,3 +84,20 @@ comm2 = Comment.objects.get(id=2)
 comm3 = Comment.objects.get(id=3)
 comm4 = Comment.objects.get(id=4)
 comm5 = Comment.objects.get(id=5)
+
+auth1.update_rating()
+auth2.update_rating()
+
+#Лучший автор - получим Query Set
+Author.objects.all().order_by('-rating').values('user__username','rating')[0]
+
+#Лучшая публикация - а тут разобьём на отдельные этапы, чтоб получать сразу значения, ну и для удобства
+best_post = Post.objects.all().order_by('-rating')[0]
+best_post.public_date.strftime('%d.%m.%Y')
+User.objects.filter(author=best_post.author).values('username')[0]['username']
+best_post.rating
+best_post.header
+best_post.preview()
+
+#Все комментарии к этой статье
+Comment.objects.filter(post=best_post).values('user__username','content')
