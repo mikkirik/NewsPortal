@@ -3,6 +3,7 @@ from news.models import *
 
 user1 = User.objects.create_user('VasyaPupkin')
 user2 = User.objects.create_user('PupaVaskin')
+user3 = User.objects.create_user('Ololosh')
 
 auth1 = Author.objects.create(user=user1)
 auth2 = Author.objects.create(user=user2)
@@ -12,12 +13,67 @@ cat2 = Category.objects.create(name='Наука и техника')
 cat3 = Category.objects.create(name='Культура')
 cat4 = Category.objects.create(name='Спорт')
 
-post1 = Post.objects.create(author=auth1,post_type=post,header='Яйки',content='Псы рвутся к власти')
+post1 = Post.objects.create(author=auth1,post_type=post,header='Яйки',content='Средняя цена на куриное яйцо в РФ за неделю с 19 по 25 декабря выросла на 3,95% - это меньше, чем за предыдущий отчетный период - на 4,62% с 12 по 18 декабря, с начала года рост цен составил 58,97%, следует из материалов Росстата.')
 post1.category.add(cat1)
 post1.category.add(cat2)
 post2 = Post.objects.create(author=auth1,post_type=news,header='АБЫРВАЛГ',content='Псы рвутся к власти')
 post2.category.add(cat1)
 post2.category.add(cat3)
-post3 = Post.objects.create(author=auth2,post_type=post,header='Тайные замыслы хомячков',content='Хомячки-убийцы заполлонили планету')
+post3 = Post.objects.create(author=auth2,post_type=post,header='Тайные замыслы хомячков',content='Хомячки-убийцы заполонили планету')
 post3.category.add(cat2)
-post4 = Post.objects.create(author=auth2,post_type=post,header='Тайны мирового правительства')
+post4 = Post.objects.create(author=auth2,post_type=post,header='Тайны мирового правительства',content='«Комитет 300. Тайны мирового правительства» — скандальная книга Джона Коулмана. Издана в 1992 году. Излагает с конспирологических позиций тему мирового правительства. В книге описывается теория заговора о «Комитете 300», в оригинале придуманная ещё в 1912 году немецким писателем-антисемитом Теодором Фричем.')
+post4.category.add(cat1)
+
+comm1 = Comment.objects.create(post=post1,user=user2,content='Это всё проделки запада!')
+comm2 = Comment.objects.create(post=post4,user=user1,content='Клевета!')
+comm3 = Comment.objects.create(post=post1,user=user3,content='Спасибо автору, он красавчик')
+comm4 = Comment.objects.create(post=post2,user=user3,content='Автор - сам собака!')
+comm5 = Comment.objects.create(post=post3,user=user3,content='Очень интересно и познавательно!')
+
+post1.like()
+post1.like()
+post1.like()
+post1.dislike()
+post2.dislike()
+post4.like()
+comm1.dislike()
+comm2.dislike()
+comm3.like()
+comm4.dislike()
+comm5.like()
+
+auth1.update_rating()
+auth2.update_rating()
+
+#Лучший автор - получим Query Set
+Author.objects.all().order_by('-rating').values('user__username','rating')[0]
+#Лучшая публикация - а тут разобьём на отдельные этапы, чтоб получать сразу значения, ну и для удобства
+best_post = Post.objects.all().order_by('-rating')[0]
+best_post.public_date.strftime('%d.%m.%Y')
+User.objects.filter(author=best_post.author).values('username')[0]['username']
+best_post.rating
+best_post.header
+best_post.preview()
+
+#После создания объектов в БД применять следующие команды
+
+from django.contrib.auth.models import User
+from news.models import *
+
+user1 = User.objects.get(id=1)
+user2 = User.objects.get(id=2)
+auth1 = Author.objects.get(id=1)
+auth2 = Author.objects.get(id=2)
+cat1 = Category.objects.get(id=1)
+cat2 = Category.objects.get(id=2)
+cat3 = Category.objects.get(id=3)
+cat4 = Category.objects.get(id=4)
+post1 = Post.objects.get(id=1)
+post2 = Post.objects.get(id=2)
+post3 = Post.objects.get(id=3)
+post4 = Post.objects.get(id=4)
+comm1 = Comment.objects.get(id=1)
+comm2 = Comment.objects.get(id=2)
+comm3 = Comment.objects.get(id=3)
+comm4 = Comment.objects.get(id=4)
+comm5 = Comment.objects.get(id=5)

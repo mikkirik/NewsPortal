@@ -1,24 +1,32 @@
 from django.db import models
+from django.db.models import Sum
 from django.contrib.auth.models import User
 
 
+# Модель автор - один к одному с пользователем
 class Author(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     rating = models.IntegerField(default=0)
 
     def update_rating(self):
-        pass
+        self.rating = (Post.objects.filter(author=self).aggregate(Sum('rating'))['rating__sum'] * 3
+                       + Comment.objects.filter(user__author=self).aggregate(Sum('rating'))['rating__sum']
+                       + Comment.objects.filter(post__author=self).aggregate(Sum('rating'))['rating__sum'])
+        self.save()
 
 
+# Уникальная категория публикации
 class Category(models.Model):
     name = models.CharField(max_length=64, unique=True)
 
 
+# Заготовка списка кортежей под выбор типа публикации в модели Post
 post = 'post'
 news = 'news'
 post_types = [(post, 'Статья'), (news, 'Новость')]
 
 
+# Собственно модель публикации
 class Post(models.Model):
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     post_type = models.CharField(max_length=10, choices=post_types, default=post)
@@ -37,14 +45,16 @@ class Post(models.Model):
         self.save()
 
     def preview(self):
-        return self.content[:124]+'...'
+        return self.content[:124] + '...'
 
 
+# Промежуточная таблица для организации связи многие ко многим между публикациями и категориями
 class PostCategory(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
 
 
+# Модель комментария под постом
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
