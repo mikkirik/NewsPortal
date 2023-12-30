@@ -47,6 +47,8 @@ class Post(models.Model):
     def preview(self):
         return self.content[:124] + '...'
 
+    def __str__(self):
+        return f'{self.header}: {self.preview()}'
 
 # Промежуточная таблица для организации связи многие ко многим между публикациями и категориями
 class PostCategory(models.Model):
