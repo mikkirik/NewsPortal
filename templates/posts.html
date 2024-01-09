@@ -1,13 +1,29 @@
 <!--  наследуемся от шаблона default.html, который мы создавали для flatpages -->
 {% extends 'flatpages/default.html' %}
 
+{% load custom_filters %}
+{% load custom_tags %}
+
 <!-- Название у нас будет Posts -->
 {% block title %}
-Posts
+Все публикации
 {% endblock title %}
 
 <!-- В контенте на странице мы выводим все публикации -->
 {% block content %}
-<h1>Все посты</h1>
-{{ posts }}
+    <h1>Все публикации</h1>
+    <h2>{% current_time '%d.%m.%Y' %}</h2>
+    <h2>Количество публикаций: {{ posts|length }}</h2>
+    <hr>
+        <table>
+            {% for post in posts %}
+            <tr>
+                <td><b>{{ post.header|censor }}</b> {{ post.public_date|date:'d.m.Y' }}</td>
+<!--                <td>{{ post.public_date|date:'d.m.Y' }}</td>-->
+            </tr>
+            <tr>
+                <td>{{ post.content|truncatewords:20|censor }}</td>
+            </tr>
+            {% endfor %}
+        </table>
 {% endblock content %}
