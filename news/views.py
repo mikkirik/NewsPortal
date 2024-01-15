@@ -15,6 +15,14 @@ class PostList(ListView):
     context_object_name = 'posts'
     paginate_by = 10
 
+
+class PostSearch(ListView):
+    model = Post
+    ordering = '-public_date'
+    template_name = 'posts_search.html'
+    context_object_name = 'posts'
+    paginate_by = 10
+
     # Переопределяем функцию получения списка
     def get_queryset(self):
         # Получаем обычный запрос
@@ -54,8 +62,25 @@ class PostCreate(CreateView):
     model = Post
     template_name = 'post_edit.html'
 
+    def form_valid(self, form):
+        post = form.save(commit=False)
+        post.post_type = 'post'
+        return super().form_valid(form)
 
-class PostUpdate(UpdateView):
+
+class NewsCreate(CreateView):
+    form_class = PostForm
+    model = Post
+    template_name = 'post_edit.html'
+
+    def form_valid(self, form):
+        post = form.save(commit=False)
+        post.post_type = 'news'
+        return super().form_valid(form)
+
+
+class PostEdit(UpdateView):
+    # указываем форму из файла forms.py - сами сделали
     form_class = PostForm
     model = Post
     template_name = 'post_edit.html'
@@ -65,4 +90,3 @@ class PostDelete(DeleteView):
     model = Post
     template_name = 'post_delete.html'
     success_url = reverse_lazy('post_list')
-
