@@ -1,13 +1,12 @@
 from django_filters import FilterSet, ModelChoiceFilter, DateFilter, CharFilter
-from .models import Post
-from django.contrib.auth.models import User
+from .models import Author
 from django.forms import DateInput
 
 
 class PostFilter(FilterSet):
     author = ModelChoiceFilter(
-        field_name='author__user__username',
-        queryset=User.objects.all(),
+        field_name='author',
+        queryset=Author.objects.all(),
         label='Автор',
         empty_label='любой'
     )

@@ -9,6 +9,9 @@ class Author(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     rating = models.IntegerField(default=0)
 
+    def __str__(self):
+        return self.user.username
+
     def update_rating(self):
         self.rating = (Post.objects.filter(author=self).aggregate(Sum('rating'))['rating__sum'] * 3
                        + Comment.objects.filter(user__author=self).aggregate(Sum('rating'))['rating__sum']
@@ -19,6 +22,9 @@ class Author(models.Model):
 # Уникальная категория публикации
 class Category(models.Model):
     name = models.CharField(max_length=64, unique=True)
+
+    def __str__(self):
+        return self.name
 
 
 # Заготовка списка кортежей под выбор типа публикации в модели Post
