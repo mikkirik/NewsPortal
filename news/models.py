@@ -1,13 +1,16 @@
 from django.db import models
 from django.db.models import Sum
 from django.contrib.auth.models import User
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 
 
 # Модель автор - один к одному с пользователем
 class Author(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     rating = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.user.username
 
     def update_rating(self):
         self.rating = (Post.objects.filter(author=self).aggregate(Sum('rating'))['rating__sum'] * 3
@@ -19,6 +22,9 @@ class Author(models.Model):
 # Уникальная категория публикации
 class Category(models.Model):
     name = models.CharField(max_length=64, unique=True)
+
+    def __str__(self):
+        return self.name
 
 
 # Заготовка списка кортежей под выбор типа публикации в модели Post
@@ -46,13 +52,21 @@ class Post(models.Model):
         self.save()
 
     def preview(self):
-        return self.content[:124] + '...'
+        if len(str(self.content)) > 125:
+            return self.content[:124] + '...'
+        else:
+            return self.content
 
     def __str__(self):
         return f'{self.header}: {self.preview()}'
 
     def get_absolute_url(self):
-        return reverse('post_detail', args=[str(self.id)])
+        if self.post_type == post:
+            return reverse('article_detail', args=[str(self.id)])
+        elif self.post_type == news:
+            return reverse('news_detail', args=[str(self.id)])
+        else:
+            reverse_lazy('post_list')
 
 
 # Промежуточная таблица для организации связи многие ко многим между публикациями и категориями

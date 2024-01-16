@@ -1,19 +1,24 @@
 <!--  наследуемся от шаблона default.html, который мы создавали для flatpages -->
-{% extends 'flatpages/default.html' %}
+{% extends 'posts.html' %}
 
 {% load custom_filters %}
 {% load custom_tags %}
 
 <!-- Название у нас будет Posts -->
 {% block title %}
-Все публикации
+Поиск публикаций
 {% endblock title %}
 
-<!-- В контенте на странице мы выводим все публикации -->
+
 {% block content %}
-     <h1>Публикации</h1>
-     <h2>{% current_time '%d.%m.%Y' %}</h2>
-<!-- <h2>Количество публикаций: {{ posts|length }}</h2>-->
+    <h1>Поиск публикаций</h1>
+    <h2>{% current_time '%d.%m.%Y' %}</h2>
+    <hr>
+
+    <form action="" method="get">
+        {{ filterset.form.as_p }}
+        <input type="submit" value="Найти" />
+    </form>
     <hr>
 
     {% if posts %}
@@ -50,5 +55,4 @@
             <a href="?{% url_replace page=page_obj.paginator.num_pages %}">{{ page_obj.paginator.num_pages }}</a>
         {% endif %}
     {% endif %}
-
 {% endblock content %}
