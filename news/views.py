@@ -6,6 +6,7 @@ from django.urls import  reverse_lazy
 from .models import Post
 from .filters import PostFilter
 from .forms import PostForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 class PostList(ListView):
@@ -79,7 +80,7 @@ class NewsCreate(CreateView):
         return super().form_valid(form)
 
 
-class PostEdit(UpdateView):
+class PostEdit(LoginRequiredMixin, UpdateView):
     # указываем форму из файла forms.py - сами сделали
     form_class = PostForm
     model = Post
