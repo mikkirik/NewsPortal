@@ -6,7 +6,7 @@ from django.urls import  reverse_lazy
 from .models import Post
 from .filters import PostFilter
 from .forms import PostForm
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import PermissionRequiredMixin
 
 
 class PostList(ListView):

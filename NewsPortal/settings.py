@@ -142,7 +142,7 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 
-ACCOUNT_FORMS = {'signup': 'news.models.BasicSignupForm'}
+ACCOUNT_FORMS = {'signup': 'news.forms.BasicSignupForm'}
 ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/login'
 
 # Internationalization
