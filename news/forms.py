@@ -6,6 +6,7 @@ from django.contrib.auth.models import Group
 users = User.objects.all()
 authors = Author.objects.all()
 
+
 class PostForm(forms.ModelForm):
     # author = forms.ModelChoiceField(
     #     queryset=users,

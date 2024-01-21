@@ -8,6 +8,9 @@ from .filters import PostFilter
 from .forms import PostForm
 from django.contrib.auth.mixins import PermissionRequiredMixin
 
+from django.core.mail import send_mail, EmailMultiAlternatives
+from django.template.loader import render_to_string
+
 
 class PostList(ListView):
     model = Post
@@ -81,6 +84,26 @@ class NewsCreate(PermissionRequiredMixin, CreateView):
     def form_valid(self, form):
         post = form.save(commit=False)
         post.post_type = 'news'
+
+        # получаем наш html
+        html_content = render_to_string(
+            'post_created.html',
+            {
+                'post': post,
+                'post_short': post.content[:49] + '...'
+            }
+        )
+
+        # в конструкторе уже знакомые нам параметры, да? Называются правда немного по-другому, но суть та же.
+        msg = EmailMultiAlternatives(
+            subject=f'Новая статья {post.author} - "{post.header}"',
+            body='',
+            from_email='mikhkirill@yandex.ru',
+            to=['mikhkirill@yandex.ru', 'mikkirik@gmail.com'],
+        )
+        msg.attach_alternative(html_content, "text/html")  # добавляем html
+        msg.send()  # отсылаем
+
         return super().form_valid(form)
 
 
