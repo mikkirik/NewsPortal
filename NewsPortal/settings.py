@@ -141,7 +141,7 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
 
 ACCOUNT_FORMS = {'signup': 'news.forms.BasicSignupForm'}
 ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/login'
@@ -181,3 +181,5 @@ EMAIL_PORT = 465  # порт smtp сервера тоже одинаковый
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')  # подтягиваем из переменных окружения
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')  # подтягиваем из переменных окружения
 EMAIL_USE_SSL = True  # Яндекс использует ssl
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER + '@yandex.ru'
