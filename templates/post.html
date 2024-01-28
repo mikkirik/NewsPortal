@@ -13,4 +13,5 @@
     <h1>{{ post.header|censor }}</h1>
     <h2>{{ post.public_date|date:'d.m.Y' }}</h2>
     {{ post.content|censor }}
+    <p>{{ post.category }}</p>
 {% endblock content %}

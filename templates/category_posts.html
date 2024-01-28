@@ -11,23 +11,26 @@
 
 <!-- В контенте на странице мы выводим все публикации -->
 {% block content %}
-     <h1>Публикации</h1>
-     <h2>{% current_time '%d.%m.%Y' %}</h2>
-<!-- <h2>Количество публикаций: {{ posts|length }}</h2>-->
+    <h1>Публикации категории "{{category}}"</h1>
+    {% if is_not_subscriber %}
+        Вы ешё не подписаны на эту категорию
+        <p class="text-center">
+            <a href="{% url 'subscribe' category.id %}" class="btn btn-dark btn-sm">Подписаться</a>
+        </p>
+    {% else %}
+        Вы подписаны на эту категорию
+        <p class="text-center">
+            <a href="{% url 'unsubscribe' category.id %}" class="btn btn-outline-dark btn-sm">Отписаться</a>
+        </p>
+    {% endif %}
+    <h2>{% current_time '%d.%m.%Y' %}</h2>
     <hr>
 
-    {% if posts %}
+    {% if category_posts %}
         <table>
-            {% for post in posts %}
+            {% for post in category_posts %}
             <tr>
                 <td><b>{{ post.header|censor }}</b> {{ post.public_date|date:'d.m.Y' }}</td>
-            </tr>
-            <tr>
-                <td>
-                {% for category in post.category.all %}
-                    <a href={% url "category_list" category.id%}>{{category}}</a>
-                {% endfor %}
-                </td>
             </tr>
             <tr>
                 <td>{{ post.content|truncatewords:20|censor }}</td>

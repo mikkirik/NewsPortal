@@ -6,8 +6,9 @@
     <title>Document</title>
 </head>
 <body>
-    <h2> {{post.header}} </h2>
-    <p> {{post_short}} </p>
+    <p> Здравствуйте, уважаемый {{username}}! Новая статья в твоём любимом разделе</p>
+    <h1> {{post.header}} </h1>
+    <p> {{post.content|truncatechars:50}}... </p>
     <p> Автор - {{post.author}}</p>
 </body>
 </html>

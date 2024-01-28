@@ -104,3 +104,7 @@ best_post.preview()
 
 #Все комментарии к этой статье
 Comment.objects.filter(post=best_post).values('user__username','content')
+
+User.objects.filter(category='1').values('email')
+Выдели в отдельную функцию рассылку
+User.objects.filter(category=post1.category.all()).values('email')

@@ -1,14 +1,17 @@
 # from datetime import datetime
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from django.urls import  reverse_lazy
+from django.urls import reverse_lazy
 # from django.shortcuts import render
 # from django.http import HttpResponseRedirect
-from .models import Post
+from django.contrib.auth.models import User
+from .models import Post, Category
 from .filters import PostFilter
 from .forms import PostForm
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.shortcuts import get_object_or_404, render
+from django.contrib.auth.decorators import login_required
 
-from django.core.mail import send_mail, EmailMultiAlternatives
+from django.core.mail import get_connection, EmailMultiAlternatives
 from django.template.loader import render_to_string
 
 
@@ -18,6 +21,22 @@ class PostList(ListView):
     template_name = 'posts.html'
     context_object_name = 'posts'
     paginate_by = 10
+
+
+class CategoryList(PostList):
+    template_name = 'category_posts.html'
+    context_object_name = 'category_posts'
+
+    def get_queryset(self):
+        self.category = get_object_or_404(Category, id=self.kwargs['pk'])
+        queryset = Post.objects.filter(category=self.category).order_by('-public_date')
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_not_subscriber'] = self.request.user not in self.category.subscribers.all()
+        context['category'] = self.category
+        return context
 
 
 class PostSearch(ListView):
@@ -52,6 +71,39 @@ class PostDetail(DetailView):
     context_object_name = 'post'
 
 
+# функция рассылки писем, которую мы используем ниже
+def mailing(post):
+    # Создадим цикл, чтобы охватить все категории одного поста
+    subscribers = set()
+    for post_category in post.category.all():
+        email_list = User.objects.filter(category=post_category).values('email')
+        for email in email_list:
+            subscribers.add(email['email'])
+
+    messages = list()
+    # Через цикл набиваем список сообщений, чтоб они были индивидуальны для каждого пользователя
+    for subscriber in subscribers:
+        html_content = render_to_string(
+            'post_created.html',
+            {
+                'username': User.objects.get(email=subscriber),
+                'post': post
+            }
+        )
+
+        msg = EmailMultiAlternatives(
+            subject=f'Новая статья {post.author} - "{post.header}"',
+            body='',
+            from_email='mikhkirill@yandex.ru',
+            to=[subscriber],
+        )
+        msg.attach_alternative(html_content, "text/html")  # добавляем html
+        messages.append(msg)
+
+    connection = get_connection()  # uses SMTP server specified in settings.py
+    connection.send_messages(messages)
+
+
 # def create_post(request):
 #     if request.method == 'POST':
 #         form = PostForm(request.POST)
@@ -71,7 +123,10 @@ class PostCreate(PermissionRequiredMixin, CreateView):
     def form_valid(self, form):
         post = form.save(commit=False)
         post.post_type = 'post'
-        return super().form_valid(form)
+
+        if super().form_valid(form):  # делаем form_valid, чтоб статья добавилась в ДБ и образовались связи
+            mailing(post)
+            return super().form_valid(form)
 
 
 class NewsCreate(PermissionRequiredMixin, CreateView):
@@ -85,26 +140,9 @@ class NewsCreate(PermissionRequiredMixin, CreateView):
         post = form.save(commit=False)
         post.post_type = 'news'
 
-        # получаем наш html
-        html_content = render_to_string(
-            'post_created.html',
-            {
-                'post': post,
-                'post_short': post.content[:49] + '...'
-            }
-        )
-
-        # в конструкторе уже знакомые нам параметры, да? Называются правда немного по-другому, но суть та же.
-        msg = EmailMultiAlternatives(
-            subject=f'Новая статья {post.author} - "{post.header}"',
-            body='',
-            from_email='mikhkirill@yandex.ru',
-            to=['mikhkirill@yandex.ru', 'mikkirik@gmail.com'],
-        )
-        msg.attach_alternative(html_content, "text/html")  # добавляем html
-        msg.send()  # отсылаем
-
-        return super().form_valid(form)
+        if super().form_valid(form):  # делаем form_valid, чтоб статья добавилась в ДБ и образовались связи
+            mailing(post)
+            return super().form_valid(form)
 
 
 class PostEdit(PermissionRequiredMixin, UpdateView):
@@ -115,8 +153,28 @@ class PostEdit(PermissionRequiredMixin, UpdateView):
     template_name = 'post_edit.html'
 
 
-class PostDelete(PermissionRequiredMixin ,DeleteView):
+class PostDelete(PermissionRequiredMixin, DeleteView):
     permission_required = 'news.delete_post'
     model = Post
     template_name = 'post_delete.html'
     success_url = reverse_lazy('post_list')
+
+
+@login_required
+def subscribe(request, pk):
+    user = request.user
+    category = Category.objects.get(id=pk)
+    category.subscribers.add(user)
+
+    msg = f'Вы подписались на рассылку категории "{category}"'
+    return render(request, 'subscribe.html', {'message': msg})
+
+
+@login_required
+def unsubscribe(request, pk):
+    user = request.user
+    category = Category.objects.get(id=pk)
+    category.subscribers.remove(user)
+
+    msg = f'Вы отписались от рассылки категории "{category}"'
+    return render(request, 'subscribe.html', {'message': msg})
