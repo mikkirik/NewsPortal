@@ -27,10 +27,20 @@
     <hr>
 
     {% if category_posts %}
-        <table>
+        <table align="center">
             {% for post in category_posts %}
             <tr>
-                <td><b>{{ post.header|censor }}</b> {{ post.public_date|date:'d.m.Y' }}</td>
+                <td><b><a href="{% url 'news_detail' post.id %}">{{ post.header|censor }}</a></b></td>
+            </tr>
+            <tr>
+                <td>{{ post.public_date|date:'d.m.Y' }}</td>
+            </tr>
+            <tr>
+                <td>Категории:
+                {% for category in post.category.all %}
+                    <a href={% url "category_list" category.id%}>{{category}}</a>
+                {% endfor %}
+                </td>
             </tr>
             <tr>
                 <td>{{ post.content|truncatewords:20|censor }}</td>
