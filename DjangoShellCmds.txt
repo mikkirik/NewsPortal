@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from news.models import *
+import datetime
 
 user1 = User.objects.create_user('VasyaPupkin')
 user2 = User.objects.create_user('PupaVaskin')

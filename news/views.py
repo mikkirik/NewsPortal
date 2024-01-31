@@ -3,16 +3,13 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.urls import reverse_lazy
 # from django.shortcuts import render
 # from django.http import HttpResponseRedirect
-from django.contrib.auth.models import User
+
 from .models import Post, Category
 from .filters import PostFilter
 from .forms import PostForm
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
-
-from django.core.mail import get_connection, EmailMultiAlternatives
-from django.template.loader import render_to_string
 
 
 class PostList(ListView):
@@ -71,39 +68,6 @@ class PostDetail(DetailView):
     context_object_name = 'post'
 
 
-# функция рассылки писем, которую мы используем ниже
-def mailing(post):
-    # Создадим цикл, чтобы охватить все категории одного поста
-    subscribers = set()
-    for post_category in post.category.all():
-        email_list = User.objects.filter(category=post_category).values('email')
-        for email in email_list:
-            subscribers.add(email['email'])
-
-    messages = list()
-    # Через цикл набиваем список сообщений, чтоб они были индивидуальны для каждого пользователя
-    for subscriber in subscribers:
-        html_content = render_to_string(
-            'post_created.html',
-            {
-                'username': User.objects.get(email=subscriber),
-                'post': post
-            }
-        )
-
-        msg = EmailMultiAlternatives(
-            subject=f'Новая статья {post.author} - "{post.header}"',
-            body='',
-            from_email='mikhkirill@yandex.ru',
-            to=[subscriber],
-        )
-        msg.attach_alternative(html_content, "text/html")  # добавляем html
-        messages.append(msg)
-
-    connection = get_connection()  # uses SMTP server specified in settings.py
-    connection.send_messages(messages)
-
-
 # def create_post(request):
 #     if request.method == 'POST':
 #         form = PostForm(request.POST)
@@ -123,10 +87,7 @@ class PostCreate(PermissionRequiredMixin, CreateView):
     def form_valid(self, form):
         post = form.save(commit=False)
         post.post_type = 'post'
-
-        if super().form_valid(form):  # делаем form_valid, чтоб статья добавилась в ДБ и образовались связи
-            mailing(post)
-            return super().form_valid(form)
+        return super().form_valid(form)
 
 
 class NewsCreate(PermissionRequiredMixin, CreateView):
@@ -139,10 +100,7 @@ class NewsCreate(PermissionRequiredMixin, CreateView):
     def form_valid(self, form):
         post = form.save(commit=False)
         post.post_type = 'news'
-
-        if super().form_valid(form):  # делаем form_valid, чтоб статья добавилась в ДБ и образовались связи
-            mailing(post)
-            return super().form_valid(form)
+        return super().form_valid(form)
 
 
 class PostEdit(PermissionRequiredMixin, UpdateView):

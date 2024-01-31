@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'news',
+    'news.apps.NewsConfig',
     'django.contrib.sites',
     'django.contrib.flatpages',
     'NewsPortal.fpages',
@@ -47,9 +47,9 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    # ... include the providers you want to enable:
     'allauth.socialaccount.providers.google',
     'protect',
+    'django_apscheduler',
 ]
 
 SITE_ID = 1
@@ -178,8 +178,17 @@ load_dotenv()
 
 EMAIL_HOST = 'smtp.yandex.ru'  # адрес сервера Яндекс-почты для всех один и тот же
 EMAIL_PORT = 465  # порт smtp сервера тоже одинаковый
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')  # подтягиваем из переменных окружения
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')  # подтягиваем из переменных окружения
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')  # подтягиваем из переменных окружения
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')  # подтягиваем из переменных окружения
 EMAIL_USE_SSL = True  # Яндекс использует ssl
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER + '@yandex.ru'
+
+SITE_URL = 'http://127.0.0.1:8000'
+
+# формат даты, которую будет воспринимать наш задачник
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+
+# если задача не выполняется за 25 секунд, то она автоматически снимается,
+# можете поставить время побольше, но как правило, это сильно бьёт по производительности сервера
+APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds
