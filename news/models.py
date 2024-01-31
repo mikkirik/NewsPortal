@@ -22,6 +22,7 @@ class Author(models.Model):
 # Уникальная категория публикации
 class Category(models.Model):
     name = models.CharField(max_length=64, unique=True)
+    subscribers = models.ManyToManyField(User, through='CategorySubscribers')
 
     def __str__(self):
         return self.name
@@ -31,6 +32,12 @@ class Category(models.Model):
 post = 'post'
 news = 'news'
 post_types = [(post, 'Статья'), (news, 'Новость')]
+
+
+# Промежуточная таблица для организации связи многие ко многим между категориями и их подписчиками
+class CategorySubscribers(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
 # Собственно модель публикации

@@ -13,4 +13,9 @@
     <h1>{{ post.header|censor }}</h1>
     <h2>{{ post.public_date|date:'d.m.Y' }}</h2>
     {{ post.content|censor }}
+    <p>
+        {% for category in post.category.all %}
+            <a href={% url "category_list" category.id%}>{{category}}</a>
+        {% endfor %}
+    </p>
 {% endblock content %}

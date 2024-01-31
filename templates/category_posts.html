@@ -11,14 +11,24 @@
 
 <!-- В контенте на странице мы выводим все публикации -->
 {% block content %}
-     <h1>Публикации</h1>
-     <h2>{% current_time '%d.%m.%Y' %}</h2>
-<!-- <h2>Количество публикаций: {{ posts|length }}</h2>-->
+    <h1>Публикации категории "{{category}}"</h1>
+    {% if is_not_subscriber %}
+        Вы ешё не подписаны на эту категорию
+        <p class="text-center">
+            <a href="{% url 'subscribe' category.id %}" class="btn btn-dark btn-sm">Подписаться</a>
+        </p>
+    {% else %}
+        Вы подписаны на эту категорию
+        <p class="text-center">
+            <a href="{% url 'unsubscribe' category.id %}" class="btn btn-outline-dark btn-sm">Отписаться</a>
+        </p>
+    {% endif %}
+    <h2>{% current_time '%d.%m.%Y' %}</h2>
     <hr>
 
-    {% if posts %}
+    {% if category_posts %}
         <table align="center">
-            {% for post in posts %}
+            {% for post in category_posts %}
             <tr>
                 <td><b><a href="{% url 'news_detail' post.id %}">{{ post.header|censor }}</a></b></td>
             </tr>
@@ -39,7 +49,7 @@
         </table>
     {% else %}
        <h2>Публикаций нет!</h2>
-   {% endif %}
+    {% endif %}
 
 
     {% if page_obj.has_previous %}

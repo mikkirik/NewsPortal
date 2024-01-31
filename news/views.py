@@ -1,12 +1,15 @@
 # from datetime import datetime
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from django.urls import  reverse_lazy
+from django.urls import reverse_lazy
 # from django.shortcuts import render
 # from django.http import HttpResponseRedirect
-from .models import Post
+
+from .models import Post, Category
 from .filters import PostFilter
 from .forms import PostForm
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.shortcuts import get_object_or_404, render
+from django.contrib.auth.decorators import login_required
 
 
 class PostList(ListView):
@@ -15,6 +18,22 @@ class PostList(ListView):
     template_name = 'posts.html'
     context_object_name = 'posts'
     paginate_by = 10
+
+
+class CategoryList(PostList):
+    template_name = 'category_posts.html'
+    context_object_name = 'category_posts'
+
+    def get_queryset(self):
+        self.category = get_object_or_404(Category, id=self.kwargs['pk'])
+        queryset = Post.objects.filter(category=self.category).order_by('-public_date')
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_not_subscriber'] = self.request.user not in self.category.subscribers.all()
+        context['category'] = self.category
+        return context
 
 
 class PostSearch(ListView):
@@ -92,8 +111,28 @@ class PostEdit(PermissionRequiredMixin, UpdateView):
     template_name = 'post_edit.html'
 
 
-class PostDelete(PermissionRequiredMixin ,DeleteView):
+class PostDelete(PermissionRequiredMixin, DeleteView):
     permission_required = 'news.delete_post'
     model = Post
     template_name = 'post_delete.html'
     success_url = reverse_lazy('post_list')
+
+
+@login_required
+def subscribe(request, pk):
+    user = request.user
+    category = Category.objects.get(id=pk)
+    category.subscribers.add(user)
+
+    msg = f'Вы подписались на рассылку категории "{category}"'
+    return render(request, 'subscribe.html', {'message': msg})
+
+
+@login_required
+def unsubscribe(request, pk):
+    user = request.user
+    category = Category.objects.get(id=pk)
+    category.subscribers.remove(user)
+
+    msg = f'Вы отписались от рассылки категории "{category}"'
+    return render(request, 'subscribe.html', {'message': msg})
