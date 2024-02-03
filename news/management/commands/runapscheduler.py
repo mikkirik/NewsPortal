@@ -19,44 +19,45 @@ logger = logging.getLogger(__name__)
 
 
 def my_job():
-    today = datetime.datetime.now()
-    week_ago = today - datetime.timedelta(days=7)
-    # посты за неделю
-    week_posts = Post.objects.filter(public_date__gte=week_ago)
-    # множество категорий, которые были в этих постах
-    week_categories = set(week_posts.values_list('category__name', flat=True))
-    # чистим от постов без категорий
-    week_categories.remove(None)
-    # множество имейлов, которые подписаны на эти категории
-    emails = set(Category.objects.filter(name__in=week_categories).values_list('subscribers__email', flat=True))
-    # чистим от того случая, когда никто не подписан на категорию
-    emails.remove(None)
-
-    messages = list()
-    # Через цикл набиваем список сообщений, чтоб они были индивидуальны для каждого пользователя
-    for email in emails:
-        # индивидуальная подборка сообщений для каждого пользователя
-        post_list = week_posts.filter(category__subscribers__email=email)
-        html_content = render_to_string(
-            'post_digest.html',
-            {
-                'username': User.objects.get(email=email),
-                'posts': post_list,
-                'link': f'{settings.SITE_URL}'
-            }
-        )
-
-        msg = EmailMultiAlternatives(
-            subject=f'Подборка статей за неделю от {datetime.datetime.now().strftime("%d.%m.%Y")}',
-            body='',
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[email],
-        )
-        msg.attach_alternative(html_content, "text/html")  # добавляем html
-        messages.append(msg)
-
-    connection = get_connection()  # uses SMTP server specified in settings.py
-    connection.send_messages(messages)
+    pass
+    # today = datetime.datetime.now()
+    # week_ago = today - datetime.timedelta(days=7)
+    # # посты за неделю
+    # week_posts = Post.objects.filter(public_date__gte=week_ago)
+    # # множество категорий, которые были в этих постах
+    # week_categories = set(week_posts.values_list('category__name', flat=True))
+    # # чистим от постов без категорий
+    # week_categories.remove(None)
+    # # множество имейлов, которые подписаны на эти категории
+    # emails = set(Category.objects.filter(name__in=week_categories).values_list('subscribers__email', flat=True))
+    # # чистим от того случая, когда никто не подписан на категорию
+    # emails.remove(None)
+    #
+    # messages = list()
+    # # Через цикл набиваем список сообщений, чтоб они были индивидуальны для каждого пользователя
+    # for email in emails:
+    #     # индивидуальная подборка сообщений для каждого пользователя
+    #     post_list = week_posts.filter(category__subscribers__email=email)
+    #     html_content = render_to_string(
+    #         'post_digest.html',
+    #         {
+    #             'username': User.objects.get(email=email),
+    #             'posts': post_list,
+    #             'link': f'{settings.SITE_URL}'
+    #         }
+    #     )
+    #
+    #     msg = EmailMultiAlternatives(
+    #         subject=f'Подборка статей за неделю от {datetime.datetime.now().strftime("%d.%m.%Y")}',
+    #         body='',
+    #         from_email=settings.DEFAULT_FROM_EMAIL,
+    #         to=[email],
+    #     )
+    #     msg.attach_alternative(html_content, "text/html")  # добавляем html
+    #     messages.append(msg)
+    #
+    # connection = get_connection()  # uses SMTP server specified in settings.py
+    # connection.send_messages(messages)
 
 
 
