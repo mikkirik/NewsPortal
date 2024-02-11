@@ -11,37 +11,59 @@
 
 
 {% block content %}
-    <h1>Поиск публикаций</h1>
-    <h2>{% current_time '%d.%m.%Y' %}</h2>
-    <hr>
+    {% load cache %} <!-- Загружаем кэширование -->
+        {% cache 300 search %} <!-- Кэшируем заголовок на 5 минут -->
+        <h1>Поиск публикаций</h1>
+        <h2>{% current_time '%d.%m.%Y' %}</h2>
+        <hr>
 
-    <form action="" method="get">
-        {{ filterset.form.as_p }}
-        <input type="submit" value="Найти" />
-    </form>
-    <hr>
+        <form action="" method="get">
+            {{ filterset.form.as_p }}
+            <input type="submit" value="Найти" />
+        </form>
+        <hr>
+        {% endcache %}
 
     {% if posts %}
-        <table align="center">
+<!--        <table align="center">-->
+<!--            {% for post in posts %}-->
+<!--            <tr>-->
+<!--                <td><b><a href="{% url 'news_detail' post.id %}">{{ post.header|censor }}</a></b></td>-->
+<!--            </tr>-->
+<!--            <tr>-->
+<!--                <td>{{ post.public_date|date:'d.m.Y' }}</td>-->
+<!--            </tr>-->
+<!--            <tr>-->
+<!--                <td>Категории:-->
+<!--                {% for category in post.category.all %}-->
+<!--                    <a href={% url "category_list" category.id%}>{{category}}</a>-->
+<!--                {% endfor %}-->
+<!--                </td>-->
+<!--            </tr>-->
+<!--            <tr>-->
+<!--                <td>{{ post.content|truncatewords:20|censor }}</td>-->
+<!--            </tr>-->
+<!--            {% endfor %}-->
+<!--        </table>-->
             {% for post in posts %}
-            <tr>
-                <td><b><a href="{% url 'news_detail' post.id %}">{{ post.header|censor }}</a></b></td>
-            </tr>
-            <tr>
-                <td>{{ post.public_date|date:'d.m.Y' }}</td>
-            </tr>
-            <tr>
-                <td>Категории:
-                {% for category in post.category.all %}
-                    <a href={% url "category_list" category.id%}>{{category}}</a>
-                {% endfor %}
-                </td>
-            </tr>
-            <tr>
-                <td>{{ post.content|truncatewords:20|censor }}</td>
-            </tr>
+                      <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                        <div class="col p-4 d-flex flex-column position-static">
+                          <strong class="d-inline-block mb-2 text-primary-emphasis">
+                              {% for category in post.category.all %}
+                                <a>{{category}}</a>
+                              {% endfor %}
+                            </strong>
+                          <h3 class="mb-0">{{ post.header|censor }}</h3>
+                          <div class="mb-1 text-body-secondary">{{ post.public_date|date:'d.m.Y' }}</div>
+                          <p class="card-text mb-auto">{{ post.content|truncatewords:20|censor }}</p>
+                          <a href="{% url 'news_detail' post.id %}" class="icon-link gap-1 icon-link-hover stretched-link">
+                            Продолжить чтение
+                            <i class="bi bi-chevron-right"></i>
+<!--                            <svg class="bi bi-chevron-right"><use xlink:href="#chevron-right"></use></svg>-->
+                          </a>
+                        </div>
+                </div>
             {% endfor %}
-        </table>
     {% else %}
        <h2>Публикаций нет!</h2>
    {% endif %}

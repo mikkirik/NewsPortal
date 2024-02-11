@@ -39,7 +39,7 @@ class PostForm(forms.ModelForm):
         now = datetime.datetime.now()
         day_ago = now - datetime.timedelta(hours=24)
         post_num = Post.objects.filter(author=author, public_date__gte=day_ago).count()
-        if post_num >=15:
+        if post_num >=3:
             raise ValidationError(f'Автор {author} уже опубликовал 3 статьи за последние 24ч, пора и отдохнуть')
         return cleaned_data
 
